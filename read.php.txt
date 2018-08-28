@@ -1,0 +1,92 @@
+<?php
+
+/**
+ * Function to query information based on 
+ * a parameter: in this case, location.
+ *
+ */
+
+if (isset($_POST['submit'])) {
+	try {	
+		require "../config.php";
+		require "../common.php";
+
+		$connection = new PDO($dsn, $username, $password, $options);
+
+		$sql = "SELECT * 
+						FROM users
+						WHERE location = :location";
+
+		$location = $_POST['location'];
+
+		$statement = $connection->prepare($sql);
+		$statement->bindParam(':location', $location, PDO::PARAM_STR);
+		$statement->execute();
+
+		$result = $statement->fetchAll();
+	} catch(PDOException $error) {
+		echo $sql . "<br>" . $error->getMessage();
+	}
+}
+?>
+<?php require "templates/header.php"; ?>
+		
+<?php  
+if (isset($_POST['submit'])) {
+	if ($result && $statement->rowCount() > 0) { ?>
+		<h2>Results</h2>
+
+		<table>
+			<thead>
+				<tr>
+					<th>#</th>
+					<th>Plan Name</th>
+					<th>Monthly Rental</th>
+					<th>Free Internet</th>
+					<th>Free call</th>
+					<th>Free SMS</th>
+					<th>SMS charge</th>
+					<th>Data charge</th>
+					<th>Roaming charge</th>
+				</tr>
+			</thead>
+			<tbody>
+	<?php foreach ($result as $row) { ?>
+			<tr>
+				<td><?php echo escape($row["Planname"]); ?></td>
+				<td><?php echo escape($row["Monthly Rental"]); ?></td>
+				<td><?php echo escape($row["Free Internet"]); ?></td>
+				<td><?php echo escape($row["Free Call"]); ?></td>
+				<td><?php echo escape($row["Free SMS"]); ?></td>
+				<td><?php echo escape($row["Call charge"]); ?></td>
+				<td><?php echo escape($row["SMS charge"]); ?> </td>
+<td><?php echo escape($row["Data charge"]); ?> </td>
+<td><?php echo escape($row["Roaming charge"]); ?> </td>
+			</tr>
+		<?php } ?> 
+			</tbody>
+	</table>
+	<?php } else { ?>
+		<blockquote>No results found for <?php echo escape($_POST['location']); ?>.</blockquote>
+	<?php } 
+} ?> 
+
+<h2>Find Plan based on any of the options</h2>
+
+<form method="post"><?php include "templates/header.php"; ?>
+
+
+	<label for="mon_ren">Monthly Rental</label>
+	<input type="text" id="mon_ren" name="mon_ren">
+<label for="fr_net">Free Internet</label>
+	<input type="text" id="fr_net" name="fr_net">
+<label for="fr_call">Free Calls</label>
+	<input type="text" id="fr_call" name="fr_call">
+<label for="fr_sms">Free SMS</label>
+	<input type="text" id="fr_sms" name="fr_sms">
+	<input type="submit" name="submit" value="View Results">
+</form>
+
+<a href="index.php">Back to home</a>
+
+<?php include "templates/footer.php"; ?>
